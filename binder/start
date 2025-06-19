@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Instalar cloudflared
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+chmod +x cloudflared-linux-amd64
+mv cloudflared-linux-amd64 /usr/local/bin/cloudflared
+
+# Mensagem hacker
+echo "🔥 Cluster Hacker Mode - Tunnel para Google Colab iniciado 🔥"
+
+# Iniciar Jupyter normalmente
+exec jupyter notebook --ip=0.0.0.0 --no-browser --port=8888
