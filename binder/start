@@ -1,12 +1,39 @@
-#!/bin/bash
+mkdir freeroot
+cd freeroot
 
-# Instalar cloudflared
-wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
-chmod +x cloudflared-linux-amd64
-mv cloudflared-linux-amd64 /usr/local/bin/cloudflared
+# 🔧 Baixar Proot
+wget https://github.com/proot-me/proot-static-build/releases/download/v5.3.0/proot-static-x86_64 -O proot
+chmod +x proot
 
-# Mensagem hacker
-echo "🔥 Cluster Hacker Mode - Tunnel para Google Colab iniciado 🔥"
+# 🌐 Baixar Cloudflared (Túnel público)
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O cloudflared
+chmod +x cloudflared
 
-# Iniciar Jupyter normalmente
-exec jupyter notebook --ip=0.0.0.0 --no-browser --port=8888
+# 🐧 Baixar RootFS Ubuntu
+wget https://partner-images.canonical.com/core/focal/current/ubuntu-focal-core-cloudimg-amd64-root.tar.gz -O ubuntu.tar.gz
+
+# 📦 Extrair RootFS
+mkdir rootfs
+tar -xvzf ubuntu.tar.gz -C rootfs
+
+# 🚀 Criar start.sh
+echo '#!/bin/bash
+unset LD_PRELOAD
+./proot -S ./rootfs /bin/bash' > start.sh
+chmod +x start.sh
+
+# 🚀 Criar start-job.sh
+echo '#!/bin/bash
+cd $(pwd)
+./proot -S ./rootfs /bin/bash -c "
+apt update
+apt install -y xfce4 xrdp sudo wget curl
+service xrdp start
+./cloudflared tunnel --url rdp://localhost:3389
+tail -f /dev/null
+"' > start-job.sh
+chmod +x start-job.sh
+
+# 📦 Gerar ZIP
+cd ..
+zip -r freeroot.zip freeroot
